@@ -107,7 +107,7 @@ class AlumniumBrowserPlugin(LibraryComponent):
         page = self.sync_browser.new_page()
         self.al = Alumni(page)
         if url:
-            self.goto(url)
+            page.goto(url)
 
     @keyword
     def ai_do(self, command):
