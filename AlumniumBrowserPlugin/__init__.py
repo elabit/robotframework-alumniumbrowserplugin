@@ -1,0 +1,1 @@
+from .alumniumbrowserplugin import AlumniumBrowserPlugin

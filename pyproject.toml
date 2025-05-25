@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "robotframework-alumniumbrowserplugin"
+version = "0.1.0"
+description = "Alumnium AI plugin for the Robot Framework Browser Library"
+authors = ["Simon Meggle <simon.meggle@elabit.de>"]
+license = "MIT License"
+readme = "README.md"
+
+packages = [
+    { include = "AlumniumBrowserPlugin" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+robotframework = "^7"
+robotframework-browser = "^19"
+alumnium = ">=0.10.0"
+
+
+[tool.poetry.group.dev.dependencies]
+nodeenv = "1.9.1"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+setup = "scripts.setup_env:main"
+
+# poetry run python -m nodeenv -p --node=20.11.1
