@@ -32,9 +32,8 @@ Library   Browser  plugins=AlumniumBrowserPlugin
 Suite Setup  Suite Initialization
 
 *** Variables ***
-${AI_PROVIDER}    
-${AI_MODEL}    
-${AI_API_KEY}    
+${AI_MODEL}      openai/gpt-4o
+${AI_API_KEY}    xxxxx
 ${URL}    https://seleniumbase.io/apps/calculator
 
 *** Test Cases ***
@@ -49,8 +48,7 @@ Do Calculations With AI
 *** Keywords ***
 
 Suite Initialization
-    New AI Browser  browser=chromium  headless=False
-    ...    ai_provider=${AI_PROVIDER}    
+    New AI Browser  browser=chromium  headless=False 
     ...    ai_model=${AI_MODEL}
     ...    api_key=${AI_API_KEY}
 ```

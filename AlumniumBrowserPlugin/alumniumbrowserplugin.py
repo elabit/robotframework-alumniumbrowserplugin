@@ -7,7 +7,7 @@ from robot.libraries.BuiltIn import BuiltIn
 
 from playwright.sync_api import sync_playwright
 
-from alumnium import Alumni
+from alumnium import Alumni, Provider, Model
 import os
 
 
@@ -32,10 +32,10 @@ class AlumniumBrowserPlugin(LibraryComponent):
         browser: str = "chromium",
         headless: bool = True,
         port: int = 9222,
-        ai_provider: str = None,    
+        # ai_provider: str = None,    
         ai_model: str = None,
         api_key: str = None,
-        api_base: str = None
+        # api_base: str = None
         ) -> int:
         """Creates a new Browser instance with AI capabilities
 
@@ -43,31 +43,37 @@ class AlumniumBrowserPlugin(LibraryComponent):
         | ``browser`` | Opens the specified browser. Defaults to chromium. |  `chromium` | `chromium`, `firefox`, `webkit` |
         | ``headless`` | Set to False if you want a GUI. Defaults to True. |  `True`       | `True`, `False`                        |
         | ``port`` | Port on which to open the remote debugger interface | `9222`       | `9222`, `9224`, etc.                   |
-        | ``ai_provider``   | LLM provider for AI capabilities      | `openai`      | `openai`, `anthropic`, `google`, `ollama` |
         | ``ai_model``      | Specific model to use (optional)      | *provider default* | `gpt-4o`, `claude-3-haiku`, `gemini-pro` |
         | ``api_key``       | API key for chosen provider           | `None`        | `YOUR_API_KEY`                         |
-        | ``api_base``      | Custom API endpoint (for self-hosted) | *provider default* | `http://localhost:11434`              |        
 
         Example:
-        | `New AI Browser`  ai_provider=openai  ai_model=gpt-4o  api_key=xxx    # Uses OpenAI's GPT-4o model
-        | `New AI Browser`  api_base=http://localhost:11434  ai_provider=ollama  ai_model=llama-3.1  # Uses Ollama's Llama 3.1 model with a custom API base
+        | `New AI Browser`  ai_model=openai/gpt-4o  api_key=xxx    # Uses OpenAI's GPT-4o model
+        | `New AI Browser`  ai_model=google/gemini-2.0-flash  api_key=xxx    # Uses Google's Gemini 2.0 Flash model
         """
         self.pw = None
-        if ai_provider:
-            os.environ["ALUMNIUM_AI_PROVIDER"] = ai_provider
+
+        if not ai_model:
+            raise ValueError("ai_model must be specified. Use the format 'provider/model_name', e.g., 'openai/gpt-4o'.")
+        
+        self.provider, *self.name = ai_model.lower().split("/", maxsplit=1)
+        
+        # if ai_provider:
+        #     os.environ["ALUMNIUM_AI_PROVIDER"] = ai_provider
         if ai_model:
-            os.environ["ALUMNIUM_AI_MODEL"] = ai_model
+            os.environ["ALUMNIUM_MODEL"] = ai_model
         if api_key:
-            if ai_provider == "openai":
+            if self.provider == "openai":
                 os.environ["OPENAI_API_KEY"] = api_key
-            elif ai_provider == "anthropic":
+            elif self.provider == "anthropic":
                 os.environ["ANTHROPIC_API_KEY"] = api_key
-            elif ai_provider == "google":
+            elif self.provider == "google":
                 os.environ["GOOGLE_API_KEY"] = api_key
-            elif ai_provider == "deepseek":
+            elif self.provider == "deepseek":
                 os.environ["DEEPSEEK_API_KEY"] = api_key
-        if api_base:
-            os.environ["ALUMNIUM_API_BASE"] = api_base
+        # if api_base:
+            # os.environ["ALUMNIUM_API_BASE"] = api_base
+            # raise NotImplementedError("not supported yet.")
+
 
         self.pw = sync_playwright().start()
         if browser == "chrome" or browser == "chromium":
@@ -105,7 +111,9 @@ class AlumniumBrowserPlugin(LibraryComponent):
         if not self.pw:
             raise RuntimeError("Playwright is not initialized. Please call new_ai_browser first.")
         page = self.sync_browser.new_page()
-        self.al = Alumni(page)
+        
+        model = Model(self.provider, self.name and self.name[0])
+        self.al = Alumni(page, model)
         if url:
             page.goto(url)
 
